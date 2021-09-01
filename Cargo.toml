@@ -1,0 +1,10 @@
+[package]
+name = "key_mapper"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+evdev = { git = "https://github.com/emberian/evdev" }
+lazy_static = "1.4.0"
