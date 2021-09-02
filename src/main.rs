@@ -1,15 +1,18 @@
-use evdev::{Device, InputEvent, InputEventKind::*};
+use evdev::{Device, InputEvent, InputEventKind};
 
 use std::io::Error;
 use std::sync::mpsc::channel;
 use std::thread;
 
+mod command;
 mod context;
 mod x11;
 
+use command::{Command, Key};
 use context::Context;
 
 const DEV: &str = "/dev/input/by-id/YOUR_DEV";
+
 
 fn main() -> Result<(), Error> {
     let _title_thread = thread::spawn(|| {
@@ -25,11 +28,11 @@ fn main() -> Result<(), Error> {
         let mut exec = x11::Executor::new();
         for ev in rx {
             match ev.kind() {
-                Key(_key) => {
+                InputEventKind::Key(_key) => {
                     println!("{} -- {:?}", Context::current().title, ev);
                     // In the context of Key, 1 is keypress & 2 is keyhold.
                     if ev.value() == 1 || ev.value() == 2 {
-                        exec.run(b"key a\n");
+                        exec.run(Command::Key(Key::new(evdev::Key::KEY_A).toggle_shift()));
                     }
                 }
                 _ => { /* Ignore for now. */ }
