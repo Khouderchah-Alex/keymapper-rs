@@ -3,6 +3,7 @@ use std::os::unix::process::CommandExt; // For uid().
 use std::process::{self, ChildStdin, Stdio};
 
 use crate::command::Command;
+use crate::keycode::KeyCode;
 
 
 // We prefer not to run other processes as root. However, a constraint for X11
@@ -44,7 +45,8 @@ impl Executor {
         Self { input: stdin }
     }
 
-    pub fn run(&mut self, cmd: Command) {
+    pub fn run(&mut self, cmd: &Command) {
+        println!("{:?}", cmd);
         let cmd_bytes = match cmd {
             Command::Key(key) => {
                 let mut mods = String::default();
@@ -61,12 +63,24 @@ impl Executor {
                     mods.push_str("super+");
                 }
 
-                // TODO(func) Provide support for special characters.
-                let s = format!("key {}{}\n", mods, key.key());
+                let s = format!("key {}{}\n", mods, code_to_string(key.key()));
                 s.into_boxed_str().into_boxed_bytes()
             }
         };
 
         self.input.write(&cmd_bytes).expect("failed to write");
     }
+}
+
+
+fn code_to_string(code: &KeyCode) -> String {
+    // TODO(func) Provide support for special characters.
+    match code {
+        KeyCode::UP => "Up",
+        KeyCode::LEFT => "Left",
+        KeyCode::RIGHT => "Right",
+        KeyCode::DOWN => "Down",
+        _ => return code.to_string(),
+    }
+    .to_string()
 }

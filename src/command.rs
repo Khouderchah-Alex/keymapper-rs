@@ -1,12 +1,14 @@
 //! Representation of commands to perform on behalf of the user.
+use serde::{Deserialize, Serialize};
+
 use crate::keycode::KeyCode;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Command {
     Key(Key),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Key {
     key: KeyCode,
     mods: u8,

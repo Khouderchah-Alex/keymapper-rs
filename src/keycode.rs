@@ -1,10 +1,11 @@
 //! KeyCode enum definition.
+use serde::{Deserialize, Serialize};
 
 macro_rules! key_codes {
     ($($name:ident = $val:expr,)*) => {
         #[allow(non_camel_case_types)]
         #[allow(unused)]
-        #[derive(Debug)]
+        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
         pub enum KeyCode {
             $($name = $val,)*
         }
@@ -20,6 +21,17 @@ macro_rules! key_codes {
                            )*
                        }.to_lowercase().replace("num_", "")
                 )
+            }
+        }
+
+        impl From<u16> for KeyCode {
+            fn from(val: u16) -> Self {
+                match val {
+                    $(
+                        $val => KeyCode::$name,
+                    )*
+                        _ => KeyCode::UNKNOWN,
+                }
             }
         }
     };
