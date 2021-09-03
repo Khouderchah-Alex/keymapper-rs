@@ -7,10 +7,12 @@ use std::thread;
 
 mod command;
 mod context;
+mod keycode;
 mod x11;
 
 use command::{Command, Key};
 use context::Context;
+use keycode::KeyCode;
 
 const DEV: &str = "/dev/input/by-id/YOUR_DEV";
 
@@ -30,7 +32,7 @@ fn main() -> Result<(), Error> {
                 println!("{} -- {:?}", Context::current().title, ev);
                 // In the context of Key, 1 is keypress & 2 is keyhold.
                 if ev.value() == 1 || ev.value() == 2 {
-                    exec.run(Command::Key(Key::new(evdev::Key::KEY_A).toggle_shift()));
+                    exec.run(Command::Key(Key::new(KeyCode::A).toggle_shift()));
                 }
             }
             _ => { /* Ignore for now. */ }

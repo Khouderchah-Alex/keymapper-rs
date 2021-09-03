@@ -1,4 +1,5 @@
 //! Representation of commands to perform on behalf of the user.
+use crate::keycode::KeyCode;
 
 #[derive(Debug)]
 pub enum Command {
@@ -7,23 +8,23 @@ pub enum Command {
 
 #[derive(Debug)]
 pub struct Key {
-    key: evdev::Key,
+    key: KeyCode,
     mods: u8,
 }
 
 
 impl Command {
-    pub fn from_key(key: evdev::Key) -> Self {
+    pub fn from_key(key: KeyCode) -> Self {
         Command::Key(Key::new(key))
     }
 }
 
 impl Key {
-    pub fn new(key: evdev::Key) -> Self {
+    pub fn new(key: KeyCode) -> Self {
         Self { key, mods: 0 }
     }
 
-    pub fn key(&self) -> &evdev::Key {
+    pub fn key(&self) -> &KeyCode {
         &self.key
     }
 

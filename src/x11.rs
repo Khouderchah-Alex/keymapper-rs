@@ -61,56 +61,12 @@ impl Executor {
                     mods.push_str("super+");
                 }
 
-                let s = format!("key {}{}\n", mods, key_str(key.key()));
+                // TODO(func) Provide support for special characters.
+                let s = format!("key {}{}\n", mods, key.key());
                 s.into_boxed_str().into_boxed_bytes()
             }
         };
 
         self.input.write(&cmd_bytes).expect("failed to write");
-    }
-}
-
-
-fn key_str(key: &evdev::Key) -> &'static str {
-    match key {
-        &evdev::Key::KEY_A => "a",
-        &evdev::Key::KEY_B => "b",
-        &evdev::Key::KEY_C => "c",
-        &evdev::Key::KEY_D => "d",
-        &evdev::Key::KEY_E => "e",
-        &evdev::Key::KEY_F => "f",
-        &evdev::Key::KEY_G => "g",
-        &evdev::Key::KEY_H => "h",
-        &evdev::Key::KEY_I => "i",
-        &evdev::Key::KEY_J => "j",
-        &evdev::Key::KEY_K => "k",
-        &evdev::Key::KEY_L => "l",
-        &evdev::Key::KEY_M => "m",
-        &evdev::Key::KEY_N => "n",
-        &evdev::Key::KEY_O => "o",
-        &evdev::Key::KEY_P => "p",
-        &evdev::Key::KEY_Q => "q",
-        &evdev::Key::KEY_R => "r",
-        &evdev::Key::KEY_S => "s",
-        &evdev::Key::KEY_T => "t",
-        &evdev::Key::KEY_U => "u",
-        &evdev::Key::KEY_V => "v",
-        &evdev::Key::KEY_W => "w",
-        &evdev::Key::KEY_X => "x",
-        &evdev::Key::KEY_Y => "y",
-        &evdev::Key::KEY_Z => "z",
-
-        &evdev::Key::KEY_0 => "0",
-        &evdev::Key::KEY_1 => "1",
-        &evdev::Key::KEY_2 => "2",
-        &evdev::Key::KEY_3 => "3",
-        &evdev::Key::KEY_4 => "4",
-        &evdev::Key::KEY_5 => "5",
-        &evdev::Key::KEY_6 => "6",
-        &evdev::Key::KEY_7 => "7",
-        &evdev::Key::KEY_8 => "8",
-        &evdev::Key::KEY_9 => "9",
-
-        _ => panic!(),
     }
 }
