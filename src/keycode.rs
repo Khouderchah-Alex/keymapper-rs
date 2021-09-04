@@ -6,6 +6,7 @@ macro_rules! key_codes {
         #[allow(non_camel_case_types)]
         #[allow(unused)]
         #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[serde(rename_all = "lowercase")]
         pub enum KeyCode {
             $($name = $val,)*
         }
