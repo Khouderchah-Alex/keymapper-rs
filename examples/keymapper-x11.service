@@ -1,0 +1,35 @@
+[Unit]
+Description=Keymapper service for X11.
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/keymapper
+Restart=always
+RestartSec=500ms
+
+# A constraint for X11 with authorization--used by default on modern systems--is
+# access to the user's .Xauthority file (see $XAUTHORITY defined below); either
+# the user or group below must have read access for the application to function
+# in X11 mode.
+User=keymapper
+Group=keymapper
+# Need access to /dev/input files. May vary with distribution.
+SupplementaryGroups=input
+# TODO(func) Compute this in install script.
+Environment=XAUTHORITY=/home/keymapper/.Xauthority
+Environment=DISPLAY=:0
+
+LockPersonality=true
+PrivateNetwork=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectSystem=strict
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

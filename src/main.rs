@@ -17,7 +17,7 @@ use context::Context;
 
 
 fn main() -> Result<(), Error> {
-    let file = File::open("./test.json")?;
+    let file = File::open("/etc/keymapper.d/test.json")?;
     let reader = BufReader::new(file);
     let conf: config::DeviceConfig = serde_json::from_reader(reader)?;
 

@@ -1,23 +1,14 @@
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
-use std::os::unix::process::CommandExt; // For uid().
 use std::process::{self, ChildStdin, Stdio};
 
 use crate::command::Command;
 use crate::keycode::KeyCode;
 
 
-// We prefer not to run other processes as root. However, a constraint for X11
-// with authorization--used by default on modern systems--is access to the
-// user's .Xauthority file (try `echo "$XAUTHORITY"`); the UID below must have
-// access for the application to function in X11 mode.
-const X11_UID: u32 = 1000;
-
-
 pub fn title_iter() -> Result<impl Iterator<Item = String>, Error> {
     let stdout = process::Command::new("xtitle")
         .arg("-s")
         .stdout(Stdio::piped())
-        .uid(X11_UID)
         .spawn()?
         .stdout
         .ok_or_else(|| Error::new(ErrorKind::Other, "Could not capture standard output."))?;
@@ -36,7 +27,6 @@ impl Executor {
         let stdin = process::Command::new("xdotool")
             .arg("-")
             .stdin(Stdio::piped())
-            .uid(X11_UID)
             .spawn()
             .unwrap()
             .stdin
