@@ -73,25 +73,21 @@ fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
                         continue;
                     }
                 };
-                let mut matched = false;
+
                 let title = &Context::current().title;
-                for maps in &conf.title_map {
-                    if maps.title_regex.is_match(title) {
-                        if i < maps.commands.len() {
-                            exec.run(&maps.commands[i]);
-                        } else {
-                            passthrough(&mut exec, key);
-                        }
-                        matched = true;
-                        break;
-                    }
-                }
-                if !matched {
-                    if i < conf.default_map.len() {
-                        exec.run(&conf.default_map[i]);
-                    } else {
-                        passthrough(&mut exec, key);
-                    }
+                let cmd_map = match conf
+                    .title_map
+                    .iter()
+                    .find(|map| map.title_regex.is_match(title))
+                {
+                    Some(title_map) => &title_map.commands,
+                    None => &conf.default_map,
+                };
+
+                if i < cmd_map.len() {
+                    exec.run(&cmd_map[i]);
+                } else {
+                    passthrough(&mut exec, key);
                 }
             }
             _ => { /* Ignore for now. */ }
