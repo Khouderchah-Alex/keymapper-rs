@@ -1,0 +1,34 @@
+{
+  "config_version": 1,
+  "device_path": "/dev/input/by-id/YOUR_DEVICE",
+  "hw_keys": [
+    "a", "b", "c"
+  ],
+  "default_map": [
+    {
+      "Key": { "key": "u", "mods": 0 }
+    },
+    {
+      "Key": { "key": "n", "mods": 0 }
+    },
+    {
+      "Key": { "key": "d", "mods": 0 }
+    }
+  ],
+  "title_map": [
+    {
+      "title_regex": ".*[.]pdf",
+      "commands": [
+        {
+          "Key": { "key": "u", "mods": 2 }
+        },
+        {
+          "Key": { "key": "down", "mods": 0 }
+        },
+        {
+          "Key": { "key": "d", "mods": 2 }
+        }
+      ]
+    },
+  ]
+}
