@@ -3,7 +3,7 @@ use evdev::{Device, InputEvent, InputEventKind};
 use std::fs::File;
 use std::io::{BufReader, Error};
 use std::path::Path;
-use std::sync::mpsc::{channel, Sender};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 
 mod command;
@@ -13,13 +13,13 @@ mod keycode;
 mod x11;
 
 use command::{Command, Key};
+use config::DeviceConfig;
 use context::Context;
 
 
 fn main() -> Result<(), Error> {
-    let file = File::open("/etc/keymapper.d/test.json")?;
-    let reader = BufReader::new(file);
-    let conf: config::DeviceConfig = serde_json::from_reader(reader)?;
+    let conf_file = File::open("/etc/keymapper.d/test.json")?;
+    let conf: DeviceConfig = serde_json::from_reader(BufReader::new(conf_file))?;
 
     watch_title_changes();
 
@@ -28,6 +28,34 @@ fn main() -> Result<(), Error> {
     let (tx, rx) = channel::<InputEvent>();
     watch_device(&conf.device_path, tx)?;
 
+    map_keys(rx, conf);
+    Ok(())
+}
+
+fn watch_title_changes() {
+    thread::spawn(|| {
+        for title in x11::title_iter().unwrap() {
+            let mut new_ctx = (*Context::current()).clone();
+            new_ctx.title = title.to_string();
+            new_ctx.make_current();
+        }
+    });
+}
+
+fn watch_device(dev_path: &Path, tx: Sender<InputEvent>) -> Result<(), Error> {
+    let mut d = Device::open(dev_path)?;
+    d.grab()?;
+    thread::spawn(move || {
+        loop {
+            for ev in d.fetch_events().unwrap() {
+                tx.send(ev).expect("Unable to send on channel");
+            }
+        }
+    });
+    Ok(())
+}
+
+fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
     let mut exec = x11::Executor::new();
     for ev in rx {
         match ev.kind() {
@@ -66,28 +94,4 @@ fn main() -> Result<(), Error> {
             _ => { /* Ignore for now. */ }
         }
     }
-    Ok(())
-}
-
-fn watch_title_changes() {
-    thread::spawn(|| {
-        for title in x11::title_iter().unwrap() {
-            let mut new_ctx = (*Context::current()).clone();
-            new_ctx.title = title.to_string();
-            new_ctx.make_current();
-        }
-    });
-}
-
-fn watch_device(dev_path: &Path, tx: Sender<InputEvent>) -> Result<(), Error> {
-    let mut d = Device::open(dev_path)?;
-    d.grab()?;
-    thread::spawn(move || {
-        loop {
-            for ev in d.fetch_events().unwrap() {
-                tx.send(ev).expect("Unable to send on channel");
-            }
-        }
-    });
-    Ok(())
 }
