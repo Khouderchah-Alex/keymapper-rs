@@ -66,11 +66,13 @@ fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
                     continue;
                 }
 
-                let i = conf
-                    .hw_keys
-                    .iter()
-                    .position(|e| *e as u16 == key.code())
-                    .unwrap();
+                let i = match conf.hw_keys.iter().position(|e| *e as u16 == key.code()) {
+                    Some(i) => i,
+                    None => {
+                        passthrough(&mut exec, key);
+                        continue;
+                    }
+                };
                 let mut matched = false;
                 let title = &Context::current().title;
                 for maps in &conf.title_map {
