@@ -57,11 +57,12 @@ fn watch_device(dev_path: &Path, tx: Sender<InputEvent>) -> Result<(), Error> {
 
 fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
     let mut exec = x11::Executor::new();
-    for ev in rx {
-        match ev.kind() {
+
+    for event in rx {
+        match event.kind() {
             InputEventKind::Key(key) => {
                 // In the context of Key, 1 is keypress & 2 is keyhold.
-                if ev.value() != 1 && ev.value() != 2 {
+                if event.value() != 1 && event.value() != 2 {
                     continue;
                 }
 
@@ -77,7 +78,7 @@ fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
                         if i < maps.commands.len() {
                             exec.run(&maps.commands[i]);
                         } else {
-                            exec.run(&Command::Key(Key::new(key.code().into())));
+                            passthrough(&mut exec, key);
                         }
                         matched = true;
                         break;
@@ -87,11 +88,17 @@ fn map_keys(rx: Receiver<InputEvent>, conf: DeviceConfig) {
                     if i < conf.default_map.len() {
                         exec.run(&conf.default_map[i]);
                     } else {
-                        exec.run(&Command::Key(Key::new(key.code().into())));
+                        passthrough(&mut exec, key);
                     }
                 }
             }
             _ => { /* Ignore for now. */ }
         }
     }
+}
+
+// Reproduce key without modification. Since we grab the device, ignoring a
+// key means no one sees it.
+fn passthrough(exec: &mut x11::Executor, key: evdev::Key) {
+    exec.run(&Command::Key(Key::new(key.code().into())));
 }
