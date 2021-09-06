@@ -56,6 +56,12 @@ impl Executor {
                 format!("key {}{}\n", mods, code_to_string(key.key()))
             }
             Command::String(s) => format!("type \"{}\"\n", s),
+            Command::Seq(seq) => {
+                for cmd in seq {
+                    self.run(cmd);
+                }
+                return;
+            }
         }
         .into_boxed_str()
         .into_boxed_bytes();

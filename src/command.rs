@@ -7,6 +7,7 @@ use crate::keycode::KeyCode;
 pub enum Command {
     Key(Key),
     String(String),
+    Seq(Vec<Command>),
 }
 
 #[derive(Debug, Deserialize, Serialize)]
