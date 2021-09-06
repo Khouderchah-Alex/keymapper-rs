@@ -6,6 +6,7 @@ use crate::keycode::KeyCode;
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Command {
     Key(Key),
+    String(String),
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,12 +15,6 @@ pub struct Key {
     mods: u8,
 }
 
-
-impl Command {
-    pub fn from_key(key: KeyCode) -> Self {
-        Command::Key(Key::new(key))
-    }
-}
 
 impl Key {
     pub fn new(key: KeyCode) -> Self {

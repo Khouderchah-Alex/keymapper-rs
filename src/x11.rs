@@ -53,10 +53,12 @@ impl Executor {
                     mods.push_str("super+");
                 }
 
-                let s = format!("key {}{}\n", mods, code_to_string(key.key()));
-                s.into_boxed_str().into_boxed_bytes()
+                format!("key {}{}\n", mods, code_to_string(key.key()))
             }
-        };
+            Command::String(s) => format!("type \"{}\"\n", s),
+        }
+        .into_boxed_str()
+        .into_boxed_bytes();
 
         self.input.write(&cmd_bytes).expect("failed to write");
     }

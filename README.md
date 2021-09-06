@@ -5,8 +5,8 @@ Currently only supports X11, but Wayland support is planned.
 
 ### Current features:
 * Mapping keys to keys w/modifiers
+* Mapping keys to strings
 
 ### Planned features:
-* Mapping keys to strings
-* Mapping keys to commands
+* Mapping keys to executables
 * Multiple-device support
