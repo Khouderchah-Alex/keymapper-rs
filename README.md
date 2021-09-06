@@ -1,9 +1,8 @@
 # keymapper-rs
 A Linux program to remap keys given the title of the currently-focused window.
 
-Currently only supports X11, but Wayland support is planned.
-
 ### Current features:
+* X11 support through `xtitle` and `xdotool`
 * Mapping keys to keys w/modifiers
 * Mapping keys to strings
 * Mapping keys to a sequence of commands
@@ -11,3 +10,4 @@ Currently only supports X11, but Wayland support is planned.
 ### Planned features:
 * Mapping keys to executables
 * Multiple-device support
+* Wayland support (xtitle-like support will likely be on a per-compositor basis)
