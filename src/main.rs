@@ -1,7 +1,8 @@
 use evdev::{Device, InputEvent, InputEventKind};
 
 use std::fs::File;
-use std::io::{BufReader, Error};
+use std::io::{BufReader, Error, ErrorKind};
+use std::os::unix::fs::MetadataExt; // For uid, gid, mode.
 use std::path::Path;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
@@ -18,14 +19,12 @@ use context::Context;
 
 
 fn main() -> Result<(), Error> {
-    let conf_file = File::open("/etc/keymapper.d/test.json")?;
-    let conf: DeviceConfig = serde_json::from_reader(BufReader::new(conf_file))?;
-
     watch_title_changes();
-
     // TODO(func) Support multiple devices either by multiplexing channel or by
     // creating separate channel per device.
     let (tx, rx) = channel::<InputEvent>();
+
+    let conf = load_config("/etc/keymapper.d/test.json")?;
     watch_device(&conf.device_path, tx)?;
 
     map_keys(rx, conf);
@@ -40,6 +39,24 @@ fn watch_title_changes() {
             new_ctx.make_current();
         }
     });
+}
+
+fn load_config<P: AsRef<Path>>(path: P) -> Result<DeviceConfig, Error> {
+    let conf_file = File::open(path.as_ref())?;
+    // While an unprivileged attacker can't control the stream of input events,
+    // allowing unprivileged modification of device configs opens up too many
+    // undesirable scenarios. Ensure config modification is a privileged
+    // operation.
+    let metadata = conf_file.metadata().unwrap();
+    if metadata.uid() != 0 || metadata.gid() != 0 {
+        println!("Error: Config not owned by root");
+        return Err(ErrorKind::InvalidData.into());
+    } else if metadata.mode() & 2 != 0 {
+        println!("Error: Config writable by non-root");
+        return Err(ErrorKind::InvalidData.into());
+    }
+
+    Ok(serde_json::from_reader(BufReader::new(conf_file))?)
 }
 
 fn watch_device(dev_path: &Path, tx: Sender<InputEvent>) -> Result<(), Error> {
