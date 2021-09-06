@@ -78,6 +78,7 @@ fn code_to_string(code: &KeyCode) -> String {
         KeyCode::LEFT => "Left",
         KeyCode::RIGHT => "Right",
         KeyCode::DOWN => "Down",
+        KeyCode::ENTER => "Return",
         _ => return code.to_string(),
     }
     .to_string()
