@@ -49,11 +49,15 @@ fn load_config<P: AsRef<Path>>(path: P) -> Result<DeviceConfig, Error> {
     // operation.
     let metadata = conf_file.metadata().unwrap();
     if metadata.uid() != 0 || metadata.gid() != 0 {
-        println!("Error: Config not owned by root");
-        return Err(ErrorKind::InvalidData.into());
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "Config not owned by root",
+        ));
     } else if metadata.mode() & 2 != 0 {
-        println!("Error: Config writable by non-root");
-        return Err(ErrorKind::InvalidData.into());
+        return Err(Error::new(
+            ErrorKind::InvalidData,
+            "Config writable by non-root",
+        ));
     }
 
     Ok(serde_json::from_reader(BufReader::new(conf_file))?)
