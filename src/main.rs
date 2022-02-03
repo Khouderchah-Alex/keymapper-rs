@@ -1,3 +1,4 @@
+use env_logger::{Builder, Env};
 use evdev::{Device, InputEvent, InputEventKind};
 
 use std::fs::File;
@@ -20,6 +21,9 @@ use context::Context;
 
 
 fn main() -> Result<(), Error> {
+    // Setup logging.
+    Builder::from_env(Env::default().default_filter_or("info")).init();
+
     watch_title_changes();
     // TODO(func) Support multiple devices either by multiplexing channel or by
     // creating separate channel per device.

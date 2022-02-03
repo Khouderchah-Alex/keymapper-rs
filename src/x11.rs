@@ -1,3 +1,5 @@
+use log::debug;
+
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 use std::process::{self, ChildStdin, Stdio};
 
@@ -36,7 +38,7 @@ impl Executor {
     }
 
     pub fn run(&mut self, cmd: &Command) {
-        println!("{:?}", cmd);
+        debug!("{:?}", cmd);
         let cmd_bytes = match cmd {
             Command::Key(key) => {
                 let mut mods = String::default();
