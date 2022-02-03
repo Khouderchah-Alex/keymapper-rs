@@ -3,9 +3,10 @@ use evdev::{Device, InputEvent, InputEventKind};
 use std::fs::File;
 use std::io::{BufReader, Error, ErrorKind};
 use std::os::unix::fs::MetadataExt; // For uid, gid, mode.
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
+use std::time::Duration;
 
 mod command;
 mod config;
@@ -25,7 +26,7 @@ fn main() -> Result<(), Error> {
     let (tx, rx) = channel::<InputEvent>();
 
     let conf = load_config("/etc/keymapper.d/test.json")?;
-    watch_device(&conf.device_path, tx)?;
+    watch_device(conf.device_path.clone(), tx)?;
 
     map_keys(rx, conf);
     Ok(())
@@ -63,14 +64,20 @@ fn load_config<P: AsRef<Path>>(path: P) -> Result<DeviceConfig, Error> {
     Ok(serde_json::from_reader(BufReader::new(conf_file))?)
 }
 
-fn watch_device(dev_path: &Path, tx: Sender<InputEvent>) -> Result<(), Error> {
-    let mut d = Device::open(dev_path)?;
-    d.grab()?;
+fn watch_device(dev_path: PathBuf, tx: Sender<InputEvent>) -> Result<(), Error> {
     thread::spawn(move || {
-        loop {
-            for ev in d.fetch_events().unwrap() {
-                tx.send(ev).expect("Unable to send on channel");
+        let fetch_events = |dev_path| -> Result<(), Error> {
+            let mut d = Device::open(dev_path)?;
+            d.grab()?;
+            loop {
+                for ev in d.fetch_events().unwrap() {
+                    tx.send(ev).expect("Unable to send on channel");
+                }
             }
+        };
+
+        while let Err(_err) = fetch_events(&dev_path) {
+            thread::sleep(Duration::from_secs(2));
         }
     });
     Ok(())
